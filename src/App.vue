@@ -7,6 +7,7 @@
 <template>
   <div>
     <PC></PC>
+    <!-- 测试 -->
   </div>
 </template>
 
