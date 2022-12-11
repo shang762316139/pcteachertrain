@@ -44,6 +44,7 @@
           line-width="40px"
           title-active-color="#317cfb"
           title-inactive-color="#595959"
+          @change="stateChange"
         >
           <van-tab
             :title="item.title"
@@ -197,6 +198,9 @@ export default {
     navChildren(key) {
       console.log(key, "key");
     },
+    stateChange(v) {
+      console.log(v, "ccc");
+    },
     onSearch() {
       console.log(this.searchVal, "v------v");
     },
@@ -335,10 +339,16 @@ export default {
         margin-left: 648px;
         display: flex;
         align-items: center;
+        box-sizing: border-box;
+
         .twoFormOne {
           width: 252px;
+          height: 100%;
+
           .van-search {
             padding: 0px;
+            height: 100%;
+
             border: 1px solid #317cfb;
             border-radius: 4px;
             margin-right: 12px;
@@ -356,7 +366,9 @@ export default {
             }
             .van-search__action {
               width: 92px;
-              height: 40px;
+              // height: 40px;
+              height: 100%;
+
               background: #317cfb;
               font-size: 14px;
               font-family: PingFang SC-Medium, PingFang SC;
@@ -421,10 +433,12 @@ export default {
           // border: 1px solid rgb(0, 139, 39);
 
           display: flex;
+          justify-content: space-between;
+
           .mainThreeItemThree-L {
             // width: 85px;
             height: 20px;
-            margin-right: 92px;
+            // margin-right: 92px;
             line-height: 16px;
             // border: 1px solid darkmagenta;
           }

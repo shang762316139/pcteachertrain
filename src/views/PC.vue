@@ -103,6 +103,7 @@ export default {
         margin-right: 50px;
         margin-top: 39px;
         color: #000;
+        cursor: pointer;
       }
       .highLight {
         color: #317cfb;
