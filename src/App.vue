@@ -6,20 +6,22 @@
 !-->
 <template>
   <div>
-    <PC></PC>
+    <router-view></router-view>
+
+    <!-- <PC></PC> -->
     <!-- 测试 -->
   </div>
 </template>
 
 <script>
-import PC from "./views/PC";
+// import PC from "./views/PC";
 export default {
   data() {
     return {};
   },
 
   components: {
-    PC,
+    // PC,
   },
 
   computed: {},

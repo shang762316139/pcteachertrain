@@ -5,9 +5,9 @@ import 'vant/lib/index.css';
 Vue.use(Vant);
 import router from './router'
 import store from './store'
-
+import moment from 'moment'
 Vue.config.productionTip = false
-
+Vue.prototype.$moment = moment
 new Vue({
   router,
   store,

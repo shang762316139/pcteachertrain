@@ -16,26 +16,23 @@
           class="navThree"
           v-for="(item, index) in navCon.nav"
           :key="index"
-          @click="
-            navCon.currentIndex = index;
-            navCon.view = item.componentId;
-          "
+          @click="navClick(item, index)"
           :class="{ highLight: navCon.currentIndex == index }"
         >
           {{ item.title }}
         </div>
-        <!-- <router-view></router-view> -->
       </div>
-      <keep-alive>
+      <router-view></router-view>
+      <!-- <keep-alive>
         <component v-bind:is="navCon.view"></component>
-      </keep-alive>
+      </keep-alive> -->
     </div>
   </div>
 </template>
 
 <script>
-import college from "../components/college";
-import trainingActivity from "../components/trainingActivity";
+// import college from "../components/college";
+// import trainingActivity from "../components/trainingActivity";
 export default {
   data() {
     return {
@@ -55,15 +52,24 @@ export default {
   },
 
   components: {
-    college,
-    trainingActivity,
+    // college,
+    // trainingActivity,
   },
 
   computed: {},
-
+  created() {
+    this.$router.push({ name: "college" });
+  },
   //mounted: {},
-
-  methods: {},
+  mounted() {},
+  methods: {
+    navClick(item, index) {
+      this.navCon.currentIndex = index;
+      this.navCon.view = item.componentId;
+      // this.$store.commit("ishowChage");
+      this.$router.push({ name: item.componentId });
+    },
+  },
 };
 </script>
 

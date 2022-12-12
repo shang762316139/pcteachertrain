@@ -1,14 +1,35 @@
 <!--
 * @description 
-* @fileName college.vue
+* @fileName activityItem.vue
 * @author shang
-* @date 2022/12/07 19:15:15
+* @date 2022/12/12 17:50:40
 !-->
 <template>
-  <div class="college">
-    <div class="banner"></div>
-    <div class="collegeMain">
-      <div class="mainOne">
+  <div class="activityItem">
+    <div class="banner">
+      <div class="bannerCon">
+        <div class="nav">
+          <div class="nav1 navv">当前位置:</div>
+          <div class="nav2 navv">首页</div>
+          <div class="nav3 navv">/</div>
+          <div class="nav4 navv">培训活动</div>
+          <div class="nav5 navv">/</div>
+          <div class="nav6 navv">活动详情</div>
+        </div>
+        <div class="banner-p">
+          <div class="title">高新区教师信息化在线课程</div>
+          <div class="message">
+            <div class="p1">
+              <div class="p1-title">主办单位:</div>
+              <div class="p1-content">郑州市高新区</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="activityItemMain">
+      <div class="mainOne"></div>
+      <div class="mainTwo">
         <van-tabs
           v-model="active"
           line-height="3px"
@@ -22,22 +43,10 @@
             :title="item.title"
             v-for="item in navContent"
             :key="item.type"
-          >
-            <template default>
-              <div class="childrenOne">全部主题</div>
-              <div
-                class="childrenTwo"
-                v-for="ite in item.navChildren"
-                :key="ite.type"
-                @click="navChildren(ite.type)"
-              >
-                {{ ite.title }}
-              </div>
-            </template>
-          </van-tab>
+          ></van-tab>
         </van-tabs>
       </div>
-      <div class="mainTwo">
+      <div class="mainThree">
         <van-tabs
           v-model="activestate"
           line-height="2px"
@@ -69,20 +78,24 @@
           <div class="twoFormTwo">共 <span>1000</span> 条结果</div>
         </div>
       </div>
-      <div class="mainThree">
+      <div class="mainFour">
         <div
-          class="mainThreeItem"
-          v-for="(item, index) in contentList"
+          class="mainFourItem"
+          v-for="(item, index) in this.$store.state.trainingActivity.filter(
+            (item) => item.operation.type == '2'
+          )"
           :key="item.type"
-          :style="{ marginRight: (index + 1) % 4 == 0 ? '0px' : '20px' }"
-          @click="contentItem(item.type)"
+          :style="{ marginRight: (index + 1) % 3 == 0 ? '0px' : '17px' }"
+          @click="activityItem(item.key)"
         >
-          <div class="mainThreeItemOne"></div>
-          <div class="mainThreeItemTwo">{{ item.title }}</div>
+          <div class="mainFourItemOne"></div>
+          <div class="mainFourItemTwo">
+            {{ item.activeTitle }}
+          </div>
 
-          <div class="mainThreeItemThree">
-            <div class="mainThreeItemThree-L">{{ item.time }}</div>
-            <div class="mainThreeItemThree-R">{{ item.people }}</div>
+          <div class="mainFourItemThree">
+            <div class="mainFourItemThree-L">{{ item.times }}</div>
+            <div class="mainFourItemThree-R">{{ item.people }}</div>
           </div>
         </div>
       </div>
@@ -94,93 +107,30 @@
 export default {
   data() {
     return {
-      active: 0,
       activestate: "001",
+      active: 0,
       searchVal: "",
       navContent: [
         {
           type: "01",
-          title: "全部课程",
-          navChildren: [
-            {
-              type: "001",
-              title: "资源获取与处理",
-            },
-            {
-              type: "002",
-              title: "课件设计与制作",
-            },
-            {
-              type: "003",
-              title: "微课设计与制作",
-            },
-            {
-              type: "004",
-              title: "极简教育技术",
-            },
-            {
-              type: "005",
-              title: "学科教学工具",
-            },
-          ],
+          title: "全部",
         },
         {
           type: "02",
-          title: "通知课程",
+          title: "校级",
         },
         {
           type: "03",
-          title: "教学科学",
+          title: "市级",
         },
         {
           type: "04",
-          title: "教育管理",
-        },
-        {
-          type: "05",
-          title: "专项技能",
+          title: "区级",
         },
       ],
       state: [
         { type: "001", title: "最新" },
         { type: "002", title: "热度" },
-      ],
-      contentList: [
-        {
-          type: "001",
-          title: "优教学生字B端介绍",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-        },
-        {
-          type: "002",
-          title: "优教学生字B端介绍",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-        },
-        {
-          type: "003",
-          title: "优教学生字B端介绍",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-        },
-        {
-          type: "004",
-          title: "优教学生字B端介绍",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-        },
-        {
-          type: "005",
-          title: "优教学生字B端介绍",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-        },
       ],
     };
   },
@@ -188,7 +138,7 @@ export default {
   components: {},
 
   computed: {},
-  created() {},
+
   //mounted: {},
 
   methods: {
@@ -196,42 +146,104 @@ export default {
       console.log(key, v, "key--v");
       // this.navContent[key].navChildren;
     },
-    navChildren(key) {
-      console.log(key, "key");
-    },
-    stateChange(v) {
-      console.log(v, "ccc");
-    },
     onSearch() {
       console.log(this.searchVal, "v------v");
-    },
-    contentItem(id) {
-      this.$router.push({ name: "activityItem", query: { id: id } });
     },
   },
 };
 </script>
 <style lang='scss' scoped>
-.college {
+.activityItem {
   width: 100%;
-  margin: 0 auto;
+  //   height: 100%;
   background: #efefef;
-
   .banner {
+    width: 100%;
     height: 300px;
-    background: url("../assets/banner-优教学院\ \(1\).png") no-repeat center
-      center;
-    background-size: cover;
+    background: linear-gradient(108deg, #3386ff 0%, #6aa5f9 100%);
+    opacity: 0.73;
+
+    .bannerCon {
+      height: 300px;
+      width: 1200px;
+      border: 1px solid red;
+      margin: 0 auto;
+      .nav {
+        font-family: PingFang SC-Regular, PingFang SC;
+        font-weight: 400;
+        color: #ffffff;
+        font-size: 14px;
+        margin: 24px 0 26px;
+        display: flex;
+        .navv {
+          height: 22px;
+          line-height: 22px;
+        }
+
+        .nav2 {
+          margin-left: 8px;
+        }
+        .nav3 {
+          margin: 0 8px;
+        }
+        .nav5 {
+          margin: 0 8px;
+        }
+      }
+      .banner-p {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .title {
+          width: 804px;
+          border: 1px solid red;
+          // height: 126px;
+          font-size: 64px;
+          // margin: 0 auto;
+          font-family: jiangxizhuokai-Regular, jiangxizhuokai;
+          font-weight: 400;
+          line-height: 64px;
+          margin-bottom: 35px;
+          text-shadow: 0px 4px 4px rgba(7, 25, 119, 0.25);
+          background: linear-gradient(
+            180deg,
+            #ffffff 0%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .message {
+          border: 1px solid red;
+          // min-width: 521px;
+          .p1 {
+            display: flex;
+            font-size: 28px;
+            font-family: PingFang SC-Semibold, PingFang SC;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 50px;
+            text-shadow: 0px 2px 4px rgba(9, 29, 134, 0.25);
+            .p1-title {
+              margin-right: 20px;
+            }
+          }
+        }
+      }
+    }
   }
-  .collegeMain {
+  .activityItemMain {
     width: 1200px;
     margin: 16px auto;
     background: #efefef;
-
-    border: 2px solid forestgreen;
     .mainOne {
+      height: 84px;
+      background: #ffffff;
+      border-radius: 12px 12px 12px 12px;
+      margin-top: 19px;
+    }
+    .mainTwo {
       border-radius: 6px 6px 6px 6px;
-
       .van-tabs {
         ::v-deep .van-tabs__wrap {
           height: 70px;
@@ -244,6 +256,7 @@ export default {
             padding-bottom: 0px;
             align-items: center;
             width: 100%;
+            background: #efefef;
             .van-tab {
               width: 120px;
               height: 32px;
@@ -261,52 +274,28 @@ export default {
             background: #317cfb;
           }
         }
-        ::v-deep .van-tabs__content {
-          height: 72px;
-          // border: 1px solid rgb(198, 3, 162);
-          display: flex;
-          align-items: center;
-          background: #f0f5fc;
-          border-radius: 6px 6px 6px 6px;
-
-          .van-tab__pane {
-            display: flex;
-            align-items: center;
-            .childrenOne {
-              width: 96px;
-              height: 32px;
-              background: #d6e5fe;
-              border-radius: 100px 100px 100px 100px;
-              opacity: 1;
-              color: #317cfb;
-              font-weight: bolder;
-              text-align: center;
-              line-height: 32px;
-              margin: 0 19px;
-            }
-
-            .childrenTwo {
-              height: 24px;
-              font-size: 16px;
-              font-family: PingFang SC-Regular, PingFang SC;
-              font-weight: 400;
-              color: #131415;
-              line-height: 24px;
-              margin: 0 19px;
-              cursor: pointer;
-            }
-          }
-        }
+        // ::v-deep .van-tabs__content {
+        //   height: 72px;
+        //   // border: 1px solid rgb(198, 3, 162);
+        //   display: flex;
+        //   align-items: center;
+        //   background: #f0f5fc;
+        //   border-radius: 6px 6px 6px 6px;
+        //   .van-tab__pane {
+        //     display: flex;
+        //     align-items: center;
+        //   }
+        // }
       }
     }
-    .mainTwo {
+    .mainThree {
       width: 100%;
       height: 60px;
       background: #ffffff;
       border-radius: 6px 6px 6px 6px;
       font-family: PingFang SC-Regular, PingFang SC;
       // border: 1px solid red;
-      margin: 16px 0;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       ::v-deep .van-tabs__wrap {
@@ -358,7 +347,8 @@ export default {
             margin-right: 12px;
             .van-search__content {
               width: 161px;
-              height: 32px;
+              // height: 32px;
+              height: 100%;
               background: #fff;
               color: #c0c4cc;
               padding-left: 12px;
@@ -371,8 +361,9 @@ export default {
             .van-search__action {
               width: 92px;
               // height: 40px;
-              height: 100%;
+              border: 1px solid #317cfb;
 
+              height: 100%;
               background: #317cfb;
               font-size: 14px;
               font-family: PingFang SC-Medium, PingFang SC;
@@ -396,31 +387,31 @@ export default {
         }
       }
     }
-    .mainThree {
+    .mainFour {
       border: 1px solid red;
       margin-top: 16px;
       display: flex;
       flex-wrap: wrap;
 
-      .mainThreeItem {
+      .mainFourItem {
         box-sizing: border-box;
-        width: 284px;
+        width: 388px;
         height: 270px;
         padding: 20px 20px 0 20px;
         background: #ffffff;
         border-radius: 6px 6px 6px 6px;
-        margin-right: 20px;
+        margin-right: 18px;
         display: flex;
         flex-direction: column;
         margin-bottom: 16px;
 
         box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.2);
-        .mainThreeItemOne {
-          width: 245px;
-          height: 163px;
+        .mainFourItemOne {
+          width: 348px;
+          height: 157px;
           border: 1px solid forestgreen;
         }
-        .mainThreeItemTwo {
+        .mainFourItemTwo {
           margin: 17px 0 9px;
           height: 25px;
           font-size: 18px;
@@ -429,7 +420,7 @@ export default {
           color: #000000;
           line-height: 21px;
         }
-        .mainThreeItemThree {
+        .mainFourItemThree {
           font-size: 14px;
           font-family: PingFang SC-Regular, PingFang SC;
           font-weight: 400;
@@ -438,15 +429,14 @@ export default {
 
           display: flex;
           justify-content: space-between;
-
-          .mainThreeItemThree-L {
+          .mainFourItemThree-L {
             // width: 85px;
             height: 20px;
             // margin-right: 92px;
             line-height: 16px;
             // border: 1px solid darkmagenta;
           }
-          .mainThreeItemThree-R {
+          .mainFourItemThree-R {
             // width: 68px;
             height: 20px;
             line-height: 16px;

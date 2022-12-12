@@ -60,26 +60,29 @@
       <div class="mainThree">
         <div
           class="mainThreeItem"
-          v-for="(item, index) in contentList"
+          v-for="(item, index) in this.$store.state.trainingActivity.filter(
+            (item) => item.operation.type == '2'
+          )"
           :key="item.type"
           :style="{ marginRight: (index + 1) % 3 == 0 ? '0px' : '17px' }"
+          @click="activityItem(item.key)"
         >
           <div class="mainThreeItemOne"></div>
           <div class="mainThreeItemTwo">
-            <p class="title">{{ item.title }}</p>
+            <p class="title">{{ item.activeTitle }}</p>
             <p
               :class="{
-                btnState1: item.state == '0',
-                btnState2: item.state == '1',
-                btnState3: item.state == '2',
+                btnState1: handlingTime(item) == '0',
+                btnState2: handlingTime(item) == '1',
+                btnState3: handlingTime(item) == '2',
               }"
             >
-              {{ showStatus(item.state) }}
+              {{ showStatus(handlingTime(item)) }}
             </p>
           </div>
 
           <div class="mainThreeItemThree">
-            <div class="mainThreeItemThree-L">{{ item.time }}</div>
+            <div class="mainThreeItemThree-L">{{ item.times }}</div>
             <div class="mainThreeItemThree-R">{{ item.people }}</div>
           </div>
         </div>
@@ -118,47 +121,54 @@ export default {
         { type: "001", title: "最新" },
         { type: "002", title: "热度" },
       ],
-      contentList: [
-        {
-          type: "001",
-          title: "中原区活动",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-          state: "0", //未开始
-        },
-        {
-          type: "002",
-          title: "金水区活动",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-          state: "1", //进行中
-        },
-        {
-          type: "003",
-          title: "高新区活动",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-          state: "2", //已结束
-        },
-        {
-          type: "004",
-          title: "荥阳活动",
-          img: "",
-          time: "2022-09-09",
-          people: "178人已学",
-          state: "0", //未开始
-        },
-      ],
+      // contentList: [
+      //   {
+      //     type: "001",
+      //     title: "中原区活动",
+      //     img: "",
+      //     time: "2022-09-09",
+      //     people: "178人已学",
+      //     state: "0", //未开始
+      //   },
+      //   {
+      //     type: "002",
+      //     title: "金水区活动",
+      //     img: "",
+      //     time: "2022-09-09",
+      //     people: "178人已学",
+      //     state: "1", //进行中
+      //   },
+      //   {
+      //     type: "003",
+      //     title: "高新区活动",
+      //     img: "",
+      //     time: "2022-09-09",
+      //     people: "178人已学",
+      //     state: "2", //已结束
+      //   },
+      //   {
+      //     type: "004",
+      //     title: "荥阳活动",
+      //     img: "",
+      //     time: "2022-09-09",
+      //     people: "178人已学",
+      //     state: "0", //未开始
+      //   },
+      // ],
     };
   },
 
   components: {},
 
   computed: {},
+  created() {
+    this.$store.dispatch("activityData");
 
+    // console.log(this.handlingTime(), "////");
+    // setTimeout(() => {
+    //   this.handlingTime();
+    // }, 2000);
+  },
   //mounted: {},
 
   methods: {
@@ -181,6 +191,30 @@ export default {
         case "2":
           return "已结束";
       }
+    },
+
+    //处理时间
+    handlingTime(ite) {
+      const nowTime = Date.parse(new Date()); //此刻时间
+      const start_time = Date.parse(new Date(ite.startTime)); //任务开始时间
+      const end_time = Date.parse(new Date(ite.endTime)); //任务结束时间
+      console.log(nowTime, "nowTime");
+      console.log(start_time, "start_time");
+      console.log(end_time, "end_time");
+
+      if (nowTime > end_time) {
+        //任务结束
+        return "2";
+      } else if (nowTime < start_time) {
+        return "0"; //未开始
+      } else {
+        return "1"; //进行中
+      }
+    },
+    activityItem(id) {
+      console.log(id, "id");
+      this.$router.push({ name: "activityItem", query: { id: id } });
+      // this.$store.commit("ishowChage");
     },
   },
 };
@@ -240,7 +274,6 @@ export default {
         //   align-items: center;
         //   background: #f0f5fc;
         //   border-radius: 6px 6px 6px 6px;
-
         //   .van-tab__pane {
         //     display: flex;
         //     align-items: center;
