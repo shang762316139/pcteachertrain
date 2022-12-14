@@ -17,12 +17,12 @@ const routes = [
       {
         path: "/trainingActivity",
         name: "trainingActivity",
-        component: () => import("../components/trainingActivity.vue"),
+        component: () => import("../views/trainingActivity.vue"),
       },
       {
         path: "/college",
         name: "college",
-        component: () => import("../components/college.vue"),
+        component: () => import("../views/college.vue"),
       },
       {
         path: "/activityItem",

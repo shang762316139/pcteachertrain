@@ -215,6 +215,15 @@ export default {
       console.log(id, "id");
       this.$router.push({ name: "activityItem", query: { id: id } });
       // this.$store.commit("ishowChage");
+      // console.log(
+      //   this.$store.state.trainingActivity[parseInt(this.$route.query.id)]
+      //     .getAddTest.addStestData,
+      //   "vv-mmmm"
+      // );
+      // console.log(
+      //   this.$store.state.trainingActivity[parseInt(this.$route.query.id)],
+      //   "vv-vvvvv"
+      // );
     },
   },
 };
