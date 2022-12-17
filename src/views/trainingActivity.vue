@@ -162,8 +162,6 @@ export default {
 
   computed: {},
   created() {
-    this.$store.dispatch("activityData");
-
     // console.log(this.handlingTime(), "////");
     // setTimeout(() => {
     //   this.handlingTime();
@@ -214,6 +212,7 @@ export default {
     activityItem(id) {
       console.log(id, "id");
       this.$router.push({ name: "activityItem", query: { id: id } });
+
       // this.$store.commit("ishowChage");
       // console.log(
       //   this.$store.state.trainingActivity[parseInt(this.$route.query.id)]

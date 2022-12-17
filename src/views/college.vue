@@ -127,6 +127,16 @@ export default {
         {
           type: "02",
           title: "通知课程",
+          navChildren: [
+            {
+              type: "001",
+              title: "资源获取与处理",
+            },
+            {
+              type: "002",
+              title: "课件设计与制作",
+            },
+          ],
         },
         {
           type: "03",
@@ -205,8 +215,8 @@ export default {
     onSearch() {
       console.log(this.searchVal, "v------v");
     },
-    contentItem(id) {
-      this.$router.push({ name: "activityItem", query: { id: id } });
+    contentItem() {
+      // this.$router.push({ name: "activityItem", query: { id: id } });
     },
   },
 };

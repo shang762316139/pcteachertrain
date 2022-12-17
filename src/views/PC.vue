@@ -59,6 +59,7 @@ export default {
   computed: {},
   created() {
     this.$router.push({ name: "college" });
+    this.$store.dispatch("activityData");
   },
   //mounted: {},
   mounted() {},

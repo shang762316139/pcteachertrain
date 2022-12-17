@@ -67,6 +67,7 @@ export default {
   data() {
     return {
       searchVal: "",
+      activestate: "",
       state: [
         { type: "001", title: "最新" },
         { type: "002", title: "热度" },

@@ -46,10 +46,11 @@
           ></van-tab>
         </van-tabs>
       </div>
-
-      <keep-alive>
-        <component v-bind:is="view"></component>
-      </keep-alive>
+      <div class="cont">
+        <keep-alive>
+          <component v-bind:is="view"></component>
+        </keep-alive>
+      </div>
     </div>
   </div>
 </template>
@@ -63,29 +64,29 @@ export default {
   data() {
     return {
       activestate: "001",
-      active: 0,
-      view: testActivity,
+      active: "",
+      view: "briefIntroduction",
       navContent: [
         {
           type: "01",
           title: "活动简介",
-          componentId: briefIntroduction,
+          componentId: "briefIntroduction",
         },
         {
           type: "02",
           title: "课程学习",
-          componentId: courseLearning,
+          componentId: "courseLearning",
         },
         {
           type: "03",
           title: "活动测试",
-          componentId: testActivity,
+          componentId: "testActivity",
         },
       ],
     };
   },
 
-  components: { testActivity, courseLearning, briefIntroduction },
+  components: { courseLearning, briefIntroduction, testActivity },
 
   computed: {},
 
@@ -236,6 +237,9 @@ export default {
         //   }
         // }
       }
+    }
+    .cont {
+      padding-bottom: 12px;
     }
   }
 }
