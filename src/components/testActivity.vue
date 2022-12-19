@@ -42,7 +42,7 @@
                 {{ storeGet.addStestData[currentPage - 1].questionStem }}
               </div>
               <!-- 单选 -->
-              <div
+              <!-- <div
                 v-show="
                   storeGet.addStestData[currentPage - 1].questionCode == '1'
                 "
@@ -59,15 +59,35 @@
                   "
                   :class="{ optionsItemBord: borCode == ite.type }"
                 >
-                  <!-- -->
 
                   <p class="optionsItemLeft">{{ ite.type }}</p>
                   <p class="optionsItemMiddle"></p>
                   <p class="optionsItemRight">{{ ite.content }}</p>
                 </div>
+              </div> -->
+              <div
+                class="radioCon"
+                v-show="
+                  storeGet.addStestData[currentPage - 1].questionCode == '1'
+                "
+              >
+                <el-radio-group v-model="radioData.radio" class="radioGroup">
+                  <el-radio
+                    :label="ite.type"
+                    border
+                    v-for="ite in storeGet.addStestData[currentPage - 1].choice"
+                    :key="ite.code"
+                    @change="choiceClick"
+                  >
+                    <p class="p1">{{ ite.type }}</p>
+                    <p class="p2">
+                      {{ ite.content }}
+                    </p>
+                  </el-radio>
+                </el-radio-group>
               </div>
               <!-- 多选 -->
-              <div
+              <!-- <div
                 v-show="
                   storeGet.addStestData[currentPage - 1].questionCode == '2'
                 "
@@ -87,6 +107,27 @@
                   <p class="optionsItemMiddle"></p>
                   <p class="optionsItemRight">{{ ite.content }}</p>
                 </div>
+              </div> -->
+              <div
+                class="checkedCon"
+                v-show="
+                  storeGet.addStestData[currentPage - 1].questionCode == '2'
+                "
+              >
+                <el-checkbox-group v-model="checkData.check" class="checkGroup">
+                  <el-checkbox
+                    :label="ite.type"
+                    border
+                    v-for="ite in storeGet.addStestData[currentPage - 1].choice"
+                    :key="ite.code"
+                    @change="choiceClick2(checkData.check)"
+                  >
+                    <p class="p1">{{ ite.type }}</p>
+                    <p class="p2">
+                      {{ ite.content }}
+                    </p>
+                  </el-checkbox>
+                </el-checkbox-group>
               </div>
             </div>
           </div>
@@ -125,10 +166,15 @@
         <div class="fourRightOne">
           <div class="fourRightTopLeft"></div>
           <!-- <div class="fourRightTopRight">04:30</div> -->
-          <van-count-down class="fourRightTopRight" :time="time" />
+          <van-count-down
+            class="fourRightTopRight"
+            :time="time"
+            @change="changeTime"
+            format="HH:mm:ss"
+          />
         </div>
         <div class="fourRightTwo">
-          <div class="fourRightTwo-1">
+          <div class="fourRightTwo-1" v-if="isButton">
             <div class="fourRightTwo-1-item">
               <span class="title">总题数:</span>
               <span>{{ this.storeGetAddTest().addStestData.length }}题</span>
@@ -142,7 +188,17 @@
               <span>{{ this.storeGetAddTest().times }}</span>
             </div>
           </div>
-          <div class="fourRightTwo-2">查看本次答题情况</div>
+          <div class="fourRightTwo-1" v-else>
+            <div class="fourRightTwo-1-item">
+              <span class="title">得分:</span>
+              <span>{{ this.totleScore() }}分</span>
+            </div>
+            <div class="fourRightTwo-1-item">
+              <span class="title">答题时长:</span>
+              <span>{{ this.storeGetAddTest().times }}</span>
+            </div>
+          </div>
+          <div class="fourRightTwo-2" @click="submitLook">查看本次答题情况</div>
         </div>
         <div class="fourRightThree">
           <div class="fourRightThreeL">题号列表</div>
@@ -155,10 +211,7 @@
             v-for="(item, index) in this.storeGetAddTest().addStestData"
             :key="item.testId"
           >
-            <div
-              ref="s"
-              :class="[index == 0 ? 'fourRightCon2' : 'fourRightCon1']"
-            >
+            <div ref="s" :class="setCircleName(item, index)">
               <!-- :class="[index == 0 ? 'fourRightCon3' : 'fourRightCon2']" -->
 
               {{ index + 1 }}
@@ -168,8 +221,15 @@
             </p>
           </div>
         </div>
-        <div class="fourRightSix" @click="totalChange(currentPage)">
+        <div
+          class="fourRightSix"
+          @click="totalChange(currentPage)"
+          v-if="isButton"
+        >
           提交答卷
+        </div>
+        <div class="fourRightSix" @click="againChange(currentPage)" v-else>
+          重新作答
         </div>
       </div>
       <!-- 提交答卷弹框 -->
@@ -187,7 +247,7 @@
           <span>此操作将提交该试卷，是否提交？ </span>
           <span slot="footer" class="dialog-footer">
             <el-button @click="cancel">取 消</el-button>
-            <el-button type="primary" @click="submit">确 定</el-button>
+            <el-button type="primary" @click="submitClick">确 定</el-button>
           </span>
         </el-dialog>
       </div>
@@ -248,19 +308,31 @@ export default {
   data() {
     return {
       currentPage: 1,
-
+      //单选
+      radioData: {
+        radio: "",
+      },
+      //多选
+      checkData: {
+        check: [],
+      },
       // 点击选项边框变蓝
       borCode: "",
-      time: parseFloat(this.storeGetAddTest().times) * 60 * 60 * 1000,
+      time: (parseFloat(this.storeGetAddTest().times) / 60) * 60 * 60 * 1000,
       // 存答案
       saveanswerArr: [],
-      checkBox: [],
+      userAnswer: "",
+      // checkBox: [],
       // checkboxGroup1: [],
+      questionsItem: {},
       storeGet: "",
       // 提交弹框
       submitVisible: false,
       // 确定弹框
       sureVisible: false,
+      //提交答题按钮
+      isButton: true,
+      useTime: "",
     };
   },
 
@@ -274,11 +346,15 @@ export default {
       console.log(this.storeGetAddTest(), "llll===");
       console.log(this.storeGetAddTest().addStestData, "xxx===");
     });
+
+    this.$store.commit("newUserAnswer", { key: this.$route.query.id });
   },
   mounted() {},
   //mounted: {},
 
   methods: {
+    // 刷新页面让store里的userAnswer为空
+
     // 处理数组里重复的对象
     removeDuplicates(arr) {
       const result = [];
@@ -356,89 +432,106 @@ export default {
       );
       return score;
     },
-    choiceClick(v, ID, e) {
+    choiceClick(v) {
       console.log(v, "vv"); //选中的选项
-      console.log(ID, "ID"); //试题ID
+      // this.userAnswer = v;
 
-      // 改变颜色
-      let answer = {};
-      // answer.singleChoice = v;
-      answer.ID = ID;
-      e = e || window.event;
-      let isActive = e.target.getAttribute("class").includes("optionsItemBord");
-      if (isActive) {
-        e.target.classList.remove("optionsItemBord");
-        answer.singleChoice = "";
-      } else {
-        // e.target.classList.add("optionsItemBord");
-        this.borCode = v;
-        answer.singleChoice = v;
-      }
-
-      this.saveanswerArr = this.saveanswerArr.filter(
-        (item) => item.ID != answer.ID
-      );
-      this.saveanswerArr.push(answer);
-      // this.removeDuplicates(this.saveanswerArr);
-      console.log(this.saveanswerArr, "this.saveanswerArr1");
+      console.log(this.userAnswer, "单");
+      this.$store.commit("userAnswer", {
+        key: this.$route.query.id,
+        testId: this.storeGet.addStestData[this.currentPage - 1].testId,
+        userAnswer: v,
+      });
+      console.log(this.userAnswer, " this.userAnswer1");
     },
-    choiceClick2(v, ID, e) {
-      console.log(v, "vv"); //选中的选项
-      console.log(ID, "ID"); //试题ID
-      // console.log(v, "vv");
-      e = e || window.event;
-      let isActive = e.target.getAttribute("class").includes("optionsItemBord");
-      if (isActive) {
-        e.target.classList.remove("optionsItemBord");
-        const index = this.checkBox.indexOf(v);
-        this.checkBox.splice(index, 1);
-        console.log(this.checkBox, "this.checkBox1");
-      } else {
-        e.target.classList.add("optionsItemBord");
-        this.checkBox.push(v);
-        console.log(this.checkBox, "this.checkBox2");
-      }
+    choiceClick2(v) {
+      console.log(v, "vv2"); //选中的选项
 
-      let answer = {};
-      answer.ID = ID;
-      answer.checkBox = this.checkBox;
-      // console.log(answer, "answer");
-      this.saveanswerArr = this.saveanswerArr.filter(
-        (item) => item.ID != answer.ID
-      );
-      this.saveanswerArr.push(answer);
-      console.log(this.saveanswerArr, "this.saveanswerArr2");
+      // this.userAnswer = v;
+      console.log(this.userAnswer, "多");
+
+      this.$store.commit("userAnswer", {
+        key: this.$route.query.id,
+        testId: this.storeGet.addStestData[this.currentPage - 1].testId,
+        userAnswer: v,
+      });
+      console.log(this.userAnswer, " this.userAnswer2");
     },
 
-    preChange(page) {
-      console.log(page, "page2");
-      if (this.currentPage + 1 == page) {
+    preChange(currentPage) {
+      console.log(currentPage, "page2");
+      if (this.currentPage + 1 == currentPage) {
         this.$refs.s[4].classList.add("fourRightCon3");
       }
-      page--;
-      this.currentPage = page;
-      this.$refs.s[page].classList.add("fourRightCon3");
-      console.log(this.$refs.s[page], "this.$refs.s[page ]");
+      currentPage--;
+      this.currentPage = currentPage;
+      this.radioData.radio =
+        this.storeGetAddTest().addStestData[currentPage - 1].userAnswer;
+      this.checkData.check =
+        this.storeGetAddTest().addStestData[currentPage - 1].userAnswer;
     },
-    pageNextChange(page) {
-      console.log(page, "page");
-      page++;
-      this.currentPage = page;
-      // console.log(this.$refs.s[page - 1], "this.$refs.s[page - 1]");
-      // console.log(this.$refs.s[page - 2], "this.$refs.s[page - 2]");
-      // console.log(this.$refs.s[page - 3], "this.$refs.s[page-3 ]");
+    pageNextChange(currentPage) {
+      console.log(this.currentPage, "this.currentPage");
+      currentPage++;
+      this.currentPage = currentPage;
+      this.radioData.radio = "";
+      this.checkData.check = [];
 
-      // console.log(this.$refs.s[page], "this.$refs.s[page ]");
+      console.log(this.userAnswer, " this.userAnswer3");
+    },
+    setCircleName(item, index) {
+      // console.log(
+      //   Boolean(
+      //     this.storeGetAddTest().addStestData[this.currentPage - 1].userAnswer
+      //   ),
+      //   ";;;"
+      // );
+      console.log(item, "item,,");
+      console.log(index, "index,,");
+      if (index + 1 == this.currentPage) {
+        console.log("22");
 
-      this.$refs.s[page - 2].classList.add("fourRightCon3");
-      this.$refs.s[page - 1].classList.add("fourRightCon2");
+        return "fourRightCon2";
+      } else {
+        if (item.userAnswer) {
+          console.log("33");
+          return "fourRightCon3";
+        } else {
+          console.log("11");
+
+          return "fourRightCon1";
+        }
+      }
+    },
+    againChange() {
+      this.currentPage = 1;
+
+      for (let i = 0; i < this.$refs.s.length; i++) {
+        if (i == 0) {
+          this.$refs.s[i].classList.remove("fourRightCon1", "fourRightCon3");
+        } else {
+          this.$refs.s[i].classList.remove("fourRightCon2", "fourRightCon3");
+          this.$refs.s[i].classList.add("fourRightCon1");
+        }
+      }
+      this.isButton = true;
+      this.time = parseFloat(this.storeGetAddTest().times) * 60 * 60 * 1000;
+      console.log(this.storeGetAddTest().times, "this.storeGetAddTest().times");
     },
     totalChange() {
       // console.log(page, "page");
       this.submitVisible = true;
+      console.log(this.useTime, "this.useTime");
+      console.log(this.storeGetAddTest().times, "this.storeGetAddTest().times");
       console.log(this.saveanswerArr, "this.saveanswerArr--00");
       localStorage.setItem("saveAnswerArr", JSON.stringify(this.saveanswerArr));
     },
+    changeTime(time) {
+      // console.log(time, "time");
+      // return time;
+      this.useTime = time;
+    },
+
     activityItem(id) {
       console.log(id, "id2");
     },
@@ -449,11 +542,13 @@ export default {
         })
         .catch(() => {});
     },
-    submit() {
+    submitLook() {
       this.submitVisible = false;
-      setTimeout(() => {
-        this.sureVisible = true;
-      }, 500);
+      this.sureVisible = true;
+    },
+    submitClick() {
+      this.submitVisible = false;
+      this.isButton = false;
     },
     cancel() {
       this.submitVisible = false;
@@ -570,39 +665,116 @@ export default {
             margin-bottom: 18px;
           }
 
-          .optionsItem {
-            width: 663px;
-            //   height: 58px;
-            background: #ffffff;
-            border-radius: 12px 12px 12px 12px;
-            opacity: 1;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            .optionsItemLeft {
-              margin: 0 8px 0 16px;
-              font-size: 18px;
-              font-family: PingFang SC-Medium, PingFang SC;
-              font-weight: 500;
-              color: rgba(0, 0, 0, 0.85);
+          .radioCon {
+            ::v-deep .radioGroup {
+              border: 1px solid red;
+              display: flex;
+              flex-direction: column;
+              .el-radio {
+                width: 663px;
+                // height: 58px;
+                background: #ffffff;
+                border-radius: 12px 12px 12px 12px;
+                border: 1px solid rgba(0, 0, 0, 0.15);
+                margin-bottom: 12px;
+                padding-top: 0;
+                display: flex;
+                // align-items: center;
+                .el-radio__input {
+                  display: none;
+                }
+                .el-radio__label {
+                  padding-left: 0px;
+                  font-size: 18px;
+                  font-family: PingFang SC-Medium, PingFang SC;
+                  font-weight: 500;
+                  color: rgba(0, 0, 0, 0.85);
+                  padding: 14px 0 18px 16px;
+                  display: flex;
+                  align-items: center;
+
+                  .p1 {
+                    height: 26px;
+                    margin: 0;
+                    line-height: 26px;
+                    margin-right: 8px;
+                  }
+                  .p2 {
+                    // height: 25px;
+                    // border: 1px solid red;
+                    width: 100%;
+                    font-size: 16px;
+                    line-height: 25px;
+                    margin: 0;
+                    padding-left: 16px;
+                    white-space: normal;
+                    border-left: 1px solid rgba(0, 0, 0, 0.15);
+                  }
+                }
+              }
+              .is-checked {
+                border: 1px solid #317cfb;
+              }
+              .is-bordered {
+                margin-left: 0;
+                height: auto;
+              }
             }
-            .optionsItemMiddle {
-              width: 1px;
-              height: 16px;
-              background: rgba(0, 0, 0, 0.15);
-              margin-right: 9px;
-            }
-            .optionsItemRight {
-              // width: 280px;
-              // height: 25px;
-              font-size: 16px;
-              font-family: Microsoft YaHei-Regular, Microsoft YaHei;
-              font-weight: 400;
-              color: rgba(0, 0, 0, 0.85);
-              line-height: 25px;
-              // border: 1px solid sandybrown;
+          }
+          .checkedCon {
+            ::v-deep .checkGroup {
+              border: 1px solid red;
+              display: flex;
+              flex-direction: column;
+              .el-checkbox {
+                width: 663px;
+                // height: 58px;
+                background: #ffffff;
+                border-radius: 12px 12px 12px 12px;
+                border: 1px solid rgba(0, 0, 0, 0.15);
+                margin-bottom: 12px;
+                padding-top: 0;
+                display: flex;
+                // align-items: center;
+                .el-checkbox__input {
+                  display: none;
+                }
+                .el-checkbox__label {
+                  padding-left: 0px;
+                  font-size: 18px;
+                  font-family: PingFang SC-Medium, PingFang SC;
+                  font-weight: 500;
+                  color: rgba(0, 0, 0, 0.85);
+                  padding: 14px 0 18px 16px;
+                  display: flex;
+                  align-items: center;
+
+                  .p1 {
+                    height: 26px;
+                    margin: 0;
+                    line-height: 26px;
+                    margin-right: 8px;
+                  }
+                  .p2 {
+                    // height: 25px;
+                    // border: 1px solid red;
+                    width: 100%;
+                    font-size: 16px;
+                    line-height: 25px;
+                    margin: 0;
+                    padding-left: 16px;
+                    white-space: normal;
+                    border-left: 1px solid rgba(0, 0, 0, 0.15);
+                  }
+                }
+              }
+              .is-checked {
+                border: 1px solid #317cfb;
+              }
+              .is-bordered {
+                margin-left: 0;
+                height: auto;
+              }
             }
           }
           //边框颜色改变
@@ -750,7 +922,7 @@ export default {
       );
       border-radius: 8px 8px 8px 8px;
       margin: 13px 11px 23px 12px;
-      padding: 9px 0 0 22px;
+      padding: 9px 22px 0 22px;
       box-sizing: border-box;
       .fourRightTwo-1 {
         display: flex;
@@ -759,10 +931,11 @@ export default {
         color: #131415;
         font-size: 14px;
         flex-wrap: wrap;
+        justify-content: space-between;
         // border: 1px solid rgb(0, 255, 94);
         .fourRightTwo-1-item {
           line-height: 24px;
-          margin-right: 23px;
+          // margin-right: 23px;
           .title {
             margin-right: 4px;
           }
@@ -835,36 +1008,40 @@ export default {
         box-sizing: border-box;
         position: relative;
         cursor: pointer;
-        // border: 1px solid #317cfb;
-        // border-radius: 50%;
-        // line-height: 44px;
-        // text-align: center;
+        border-radius: 50%;
+
         .fourRightCon1 {
-          border-radius: 50%;
-          width: 44px;
-          height: 44px;
-          background: #ffffff;
+          box-sizing: border-box;
           border: 1px solid #317cfb;
+          border-radius: 50%;
+          width: 100%;
+          height: 100%;
+          background: #ffffff;
+          // border: 1px solid #317cfb;
           color: rgba(0, 0, 0, 0.65);
           text-align: center;
           line-height: 44px;
         }
         .fourRightCon2 {
-          border-radius: 50%;
-          width: 44px;
-          height: 44px;
-          background: #eaf2ff;
+          box-sizing: border-box;
           border: 1px solid #317cfb;
+          border-radius: 50%;
+          width: 100%;
+          height: 100%;
+          background: #eaf2ff;
+          // border: 1px solid #317cfb;
           color: rgba(0, 0, 0, 0.65);
           text-align: center;
           line-height: 44px;
         }
         .fourRightCon3 {
+          box-sizing: border-box;
+          border: 1px solid #317cfb;
           border-radius: 50%;
-          width: 44px;
-          height: 44px;
+          width: 100%;
+          height: 100%;
           background: #317cfb;
-          border: 0px solid #317cfb;
+          // border: 0px solid #317cfb;
           color: #ffffff;
           text-align: center;
           line-height: 44px;
