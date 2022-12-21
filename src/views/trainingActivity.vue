@@ -196,9 +196,9 @@ export default {
       const nowTime = Date.parse(new Date()); //此刻时间
       const start_time = Date.parse(new Date(ite.startTime)); //任务开始时间
       const end_time = Date.parse(new Date(ite.endTime)); //任务结束时间
-      console.log(nowTime, "nowTime");
-      console.log(start_time, "start_time");
-      console.log(end_time, "end_time");
+      // console.log(nowTime, "nowTime");
+      // console.log(start_time, "start_time");
+      // console.log(end_time, "end_time");
 
       if (nowTime > end_time) {
         //任务结束

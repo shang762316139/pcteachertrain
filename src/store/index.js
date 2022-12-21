@@ -44,7 +44,35 @@ const mutations = {
     const activity = trainingActivity.filter((item) => item.key == key);
     activity[0].getAddTest.addStestData.forEach((item) => {
       item.userAnswer = "";
+      item.usercorrect = "";
     });
+  },
+
+  // result1({ trainingActivity }, payloade) {
+  //   const activity = trainingActivity.filter(
+  //     (item) => item.key == payloade.key
+  //   );
+
+  //   activity[0].getAddTest.addStestData.forEach((item) => {
+  //     item.usercorrect = payloade.usercorrect;
+  //   });
+  // },
+  result2({ trainingActivity }, payloade) {
+    const activity = trainingActivity.filter(
+      (item) => item.key == payloade.key
+    );
+    activity[0].getAddTest.WorngNum = payloade.WorngNum;
+    activity[0].getAddTest.rightNum = payloade.rightNum;
+    activity[0].getAddTest.answerScore = payloade.answerScore;
+    activity[0].getAddTest.userAnswerStat = payloade.userAnswerStat;
+  },
+  useTime({ trainingActivity }, payloade) {
+    const activity = trainingActivity.filter(
+      (item) => item.key == payloade.key
+    );
+    activity[0].getAddTest.hour = payloade.hour;
+    activity[0].getAddTest.minute = payloade.minute;
+    activity[0].getAddTest.second = payloade.second;
   },
 };
 //actions:同mutations类似，可以书写自己的业务逻辑，也可以处理异步，不直接更变数据状态，而是提交到mutations，由mutations进行变更
@@ -56,7 +84,7 @@ const actions = {
     //   const gettotalData = JSON.parse(localStorage.getItem("totalData"))
     //   content.commit("muaCtivityData", gettotalData)
     // }, 1000);
-    const gettotalData = JSON.parse(localStorage.getItem("totalData"));
+    const gettotalData = JSON.parse(localStorage.getItem("totalData2"));
     console.log(gettotalData, "gettotalData");
     content.commit("muaCtivityData", gettotalData);
   },
