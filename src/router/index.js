@@ -29,6 +29,12 @@ const routes = [
         name: "activityItem",
         component: () => import("../views/activityItem.vue"),
       },
+      // {
+      //   path: "/testActivity",
+      //   name: "testActivity",
+      //   component: () => import("../components/testActivity.vue"),
+
+      // }
     ],
   },
   // {

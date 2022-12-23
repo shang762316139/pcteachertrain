@@ -38,6 +38,8 @@ const mutations = {
       (item) => item.testId == payloade.testId
     );
     test[0].userAnswer = payloade.userAnswer;
+    test[0].usercorrect = payloade.usercorrect;
+    console.log(payloade.usercorrect, "test[0].usercorrect");
   },
   // 刷新页面让userAnswer为空
   newUserAnswer({ trainingActivity }, { key }) {
@@ -73,6 +75,13 @@ const mutations = {
     activity[0].getAddTest.hour = payloade.hour;
     activity[0].getAddTest.minute = payloade.minute;
     activity[0].getAddTest.second = payloade.second;
+  },
+  result3({ trainingActivity }, payloade) {
+    const activity = trainingActivity.filter(
+      (item) => item.key == payloade.key
+    );
+    activity[0].getAddTest.situation.push(payloade);
+    console.log(activity[0].getAddTest.situation, "result3");
   },
 };
 //actions:同mutations类似，可以书写自己的业务逻辑，也可以处理异步，不直接更变数据状态，而是提交到mutations，由mutations进行变更

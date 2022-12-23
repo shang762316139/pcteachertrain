@@ -53,9 +53,10 @@
                   <el-radio
                     :label="ite.type"
                     border
+                    :disabled="isButton == false ? true : false"
                     v-for="ite in storeGet.addStestData[currentPage - 1].choice"
                     :key="ite.code"
-                    @change="choiceClick"
+                    @change="choiceClick(radioData.radio, currentPage - 1)"
                   >
                     <p class="p1">{{ ite.type }}</p>
                     <p class="p2">
@@ -75,10 +76,11 @@
                 <el-checkbox-group v-model="checkData.check" class="checkGroup">
                   <el-checkbox
                     :label="ite.type"
+                    :disabled="isButton == false ? true : false"
                     border
                     v-for="ite in storeGet.addStestData[currentPage - 1].choice"
                     :key="ite.code"
-                    @change="choiceClick2(checkData.check)"
+                    @change="choiceClick2(checkData.check, currentPage - 1)"
                   >
                     <p class="p1">{{ ite.type }}</p>
                     <p class="p2">
@@ -155,11 +157,22 @@
           <div class="fourRightTwo-1" v-else>
             <div class="fourRightTwo-1-item">
               <span class="title">得分:</span>
-              <span>{{ this.storeGetAddTest().answerScore }}分</span>
+              <!-- this.storeGetAddTest().situation.length == 1
+                    ? this.storeGetAddTest().situation[
+                        this.storeGetAddTest().situation.length - 1
+                      ].answerScore
+                    : this.maxSore().answerScore -->
+              <span
+                >{{
+                  this.maxterm(this.storeGetAddTest().situation).answerScore
+                }}分</span
+              >
             </div>
             <div class="fourRightTwo-1-item">
               <span class="title">答题时长:</span>
-              <span>{{ this.storeGetAddTest().times }}分钟</span>
+              <span
+                >{{ this.maxterm(this.storeGetAddTest().situation).examTime }}
+              </span>
             </div>
           </div>
           <div class="fourRightTwo-2" @click="submitLook" v-if="lookAnswer">
@@ -285,7 +298,10 @@
             </div>
           </div>
           <span slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="lookHandle">查看错题</el-button>
+            <el-button type="primary" @click="lookHandle" v-if="lookErrors"
+              >查看错题</el-button
+            >
+            <div class="p11" v-else>成绩记录会以最优成绩为最终成绩</div>
           </span>
         </el-dialog>
       </div>
@@ -314,6 +330,8 @@ export default {
       userAnswer: "",
       // checkBox: [],
       // checkboxGroup1: [],
+      //答对答错
+      usercorrect: "",
       questionsItem: {},
       storeGet: "",
       // 提交弹框
@@ -327,6 +345,8 @@ export default {
       Interval: "",
       //查看本次答题情况
       lookAnswer: true,
+      //查看错题
+      lookErrors: true,
     };
   },
 
@@ -365,6 +385,10 @@ export default {
     // 是否已作答
     respondence() {
       console.log(this.storeGetAddTest().userAnswerStat, "kk");
+      console.log(this.storeGetAddTest().situation, "situation");
+      // console.log(this.storeGetAddTest().situation, "situation");
+
+      console.log(this.maxterm(this.storeGetAddTest().situation), "maxterm");
       // userAnswerStat="1"已作答
       // radioAnswer="1"不能重复作答 '2'可以重复作答
       // if (
@@ -391,6 +415,7 @@ export default {
         console.log(this.time, "this.time--00");
         this.isButton = false;
         this.lookAnswer = false;
+        this.lookErrors = false;
       } else if (
         this.storeGetAddTest().userAnswerStat == "1" &&
         this.storeGetAddTest().radioAnswer == "1"
@@ -432,34 +457,56 @@ export default {
     answerScore() {
       let score = 0;
       const newArr = this.storeGetAddTest().addStestData.filter(
-        (item) => item.result == item.userAnswer
+        (item) => item.result.toString() == item.userAnswer.toString()
       );
-      // console.log(newArr, "newArr-newArr");
+      console.log(newArr, "newArr-newArr");
       score = newArr.reduce((prev, cur) => prev + cur.score, 0);
       return score;
     },
-    choiceClick(v) {
+    choiceClick(v, i) {
       console.log(v, "vv"); //选中的选项
       // this.userAnswer = v;
-
+      console.log(this.storeGetAddTest().addStestData[i].result, "1~11");
+      console.log(v, "1~22");
+      if (this.storeGetAddTest().addStestData[i].result == v) {
+        this.usercorrect = "0"; //答对
+        console.log(this.usercorrect, "0-答对");
+      } else {
+        this.usercorrect = "1"; //答错
+        console.log(this.usercorrect, "1-答错");
+      }
       console.log(this.userAnswer, "单");
       this.$store.commit("userAnswer", {
         key: this.$route.query.id,
         testId: this.storeGet.addStestData[this.currentPage - 1].testId,
         userAnswer: v,
+        usercorrect: this.usercorrect,
       });
-      console.log(this.userAnswer, " this.userAnswer1");
     },
-    choiceClick2(v) {
+    choiceClick2(v, i) {
       console.log(v, "vv2"); //选中的选项
+      console.log(
+        this.storeGetAddTest().addStestData[i].result.toString(),
+        "1~1"
+      );
+      console.log(v.toString(), "1~2");
 
       // this.userAnswer = v;
       console.log(this.userAnswer, "多");
-
+      if (
+        this.storeGetAddTest().addStestData[i].result.toString() == v.toString()
+      ) {
+        this.usercorrect = "0"; //答对
+        console.log(this.usercorrect, "0-答对");
+      } else {
+        this.usercorrect = "1"; //答错
+        console.log(this.usercorrect, "1-答错");
+      }
       this.$store.commit("userAnswer", {
         key: this.$route.query.id,
         testId: this.storeGet.addStestData[this.currentPage - 1].testId,
         userAnswer: v,
+        usercorrect: this.usercorrect,
       });
       console.log(this.userAnswer, " this.userAnswer2");
     },
@@ -537,6 +584,15 @@ export default {
       this.isButton = true;
       this.time = this.storeGetAddTest().times * 60;
       this.changeTime1();
+      this.storeGetAddTest().addStestData.forEach((item, index) => {
+        if (index + 1 == this.currentPage) {
+          // console.log("22");
+
+          return "fourRightCon2";
+        } else {
+          item.userAnswer = "";
+        }
+      });
     },
     totalChange() {
       console.log(this.useTime2(), "useTime2");
@@ -547,7 +603,7 @@ export default {
       this.useTime2();
     },
 
-    //定时器
+    //定时器1
     changeTime1() {
       // let seconds = this.storeGetAddTest().times * 60;
       // console.log(seconds, "seconds");
@@ -665,6 +721,18 @@ export default {
 
       return result;
     },
+    //拼接用时
+    examTime(time) {
+      return (
+        this.useHour(time) +
+        "时" +
+        this.useMinute(time) +
+        "分" +
+        this.useSecond(time) +
+        "秒"
+      );
+    },
+
     activityItem(id) {
       console.log(id, "id2");
     },
@@ -683,7 +751,7 @@ export default {
       this.submitVisible = false;
       this.isButton = false;
       this.lookAnswer = false;
-
+      console.log(this.examTime(this.useTime2()), "examTime");
       // 确定提交答卷
       // 遍历每道题是否正确
       let num1 = 0;
@@ -693,7 +761,7 @@ export default {
           this.storeGetAddTest().addStestData[i].result.toString() ==
           this.storeGetAddTest().addStestData[i].userAnswer.toString()
         ) {
-          console.log(this.$route.query.id, "ididid1");
+          // console.log(this.$route.query.id, "ididid1");
           num1++;
 
           // this.storeGetAddTest().addStestData[i].usercorrect = "0";
@@ -702,7 +770,6 @@ export default {
           //   key: this.$route.query.id,
           // });
         } else {
-          console.log(this.$route.query.id, "ididid2");
           num2++;
         }
         console.log(num1, "num1");
@@ -720,6 +787,11 @@ export default {
         hour: this.useHour(this.useTime2()),
         minute: this.useMinute(this.useTime2()),
         second: this.useSecond(this.useTime2()),
+        key: this.$route.query.id,
+      });
+      this.$store.commit("result3", {
+        examTime: this.examTime(this.useTime2()),
+        answerScore: this.answerScore(),
         key: this.$route.query.id,
       });
       localStorage.setItem(
@@ -749,6 +821,20 @@ export default {
         this.sureVisible = true;
       }, 500);
     },
+    //得分最大项
+    maxterm(arrayobj) {
+      // const arr = this.storeGetAddTest().situation;
+      // console.log(arr, "arr");
+
+      var maxi = 0;
+      for (let i = 0; i < arrayobj.length; i++) {
+        if (arrayobj[maxi].answerScore <= arrayobj[i].answerScore) {
+          maxi = i;
+        }
+      }
+      return arrayobj[maxi];
+    },
+
     cancel() {
       this.submitVisible = false;
       this.changeTime1();
@@ -1410,6 +1496,10 @@ export default {
         justify-content: end;
 
         .dialog-footer {
+          .p11 {
+            color: #f32d2d;
+            font-size: 18px;
+          }
           .el-button {
             width: 74px;
             height: 32px;
