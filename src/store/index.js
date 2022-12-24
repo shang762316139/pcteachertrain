@@ -41,14 +41,25 @@ const mutations = {
     test[0].usercorrect = payloade.usercorrect;
     console.log(payloade.usercorrect, "test[0].usercorrect");
   },
-  // 刷新页面让userAnswer为空
-  newUserAnswer({ trainingActivity }, { key }) {
-    const activity = trainingActivity.filter((item) => item.key == key);
-    activity[0].getAddTest.addStestData.forEach((item) => {
-      item.userAnswer = "";
-      item.usercorrect = "";
-    });
+  clearAnswer({ trainingActivity }, payloade) {
+    console.log(trainingActivity, "trainingActivity");
+    const activity = trainingActivity.filter(
+      (item) => item.key == payloade.key
+    );
+    console.log(payloade, "payloade");
+    const test = activity[0].getAddTest.addStestData.filter(
+      (item) => item.testId == payloade.testId
+    );
+    test[0].userAnswer = payloade.userAnswer;
   },
+  // 刷新页面让userAnswer为空
+  // newUserAnswer({ trainingActivity }, { key }) {
+  //   const activity = trainingActivity.filter((item) => item.key == key);
+  //   activity[0].getAddTest.addStestData.forEach((item) => {
+  //     item.userAnswer = "";
+  //     item.usercorrect = "";
+  //   });
+  // },
 
   // result1({ trainingActivity }, payloade) {
   //   const activity = trainingActivity.filter(

@@ -45,7 +45,7 @@
 
               <div
                 class="radioCon"
-                v-show="
+                v-if="
                   storeGet.addStestData[currentPage - 1].questionCode == '1'
                 "
               >
@@ -57,22 +57,37 @@
                     v-for="ite in storeGet.addStestData[currentPage - 1].choice"
                     :key="ite.code"
                     @change="choiceClick(radioData.radio, currentPage - 1)"
+                    :class="colorBorder(ite)"
                   >
                     <p class="p1">{{ ite.type }}</p>
                     <p class="p2">
                       {{ ite.content }}
                     </p>
+                    <div
+                      v-show="
+                        optionIsSelected(
+                          storeGet.addStestData[currentPage - 1].userAnswer
+                        )[0] == ite &&
+                        storeGetAddTest().userAnswerStat == '1' &&
+                        storeGetAddTest().radioAnswer == '1'
+                      "
+                    >
+                      <div
+                        class="bigRight"
+                        v-if="
+                          storeGet.addStestData[
+                            currentPage - 1
+                          ].result.toString() == ite.type.toString()
+                        "
+                      ></div>
+                      <div class="bigWrong" v-else></div>
+                    </div>
                   </el-radio>
                 </el-radio-group>
               </div>
               <!-- 多选 -->
 
-              <div
-                class="checkedCon"
-                v-show="
-                  storeGet.addStestData[currentPage - 1].questionCode == '2'
-                "
-              >
+              <div class="checkedCon" v-else>
                 <el-checkbox-group v-model="checkData.check" class="checkGroup">
                   <el-checkbox
                     :label="ite.type"
@@ -81,13 +96,65 @@
                     v-for="ite in storeGet.addStestData[currentPage - 1].choice"
                     :key="ite.code"
                     @change="choiceClick2(checkData.check, currentPage - 1)"
+                    :class="colorBorder2(ite)"
                   >
                     <p class="p1">{{ ite.type }}</p>
                     <p class="p2">
                       {{ ite.content }}
                     </p>
+                    <div
+                      v-show="
+                        storeGet.addStestData[
+                          currentPage - 1
+                        ].userAnswer.includes(ite.type) &&
+                        storeGetAddTest().userAnswerStat == '1' &&
+                        storeGetAddTest().radioAnswer == '1'
+                      "
+                    >
+                      <div
+                        class="bigRight"
+                        v-if="
+                          // storeGet.addStestData[
+                          //   currentPage - 1
+                          // ].result.toString() == ite.type.toString()
+                          storeGet.addStestData[
+                            currentPage - 1
+                          ].result.includes(ite.type) &&
+                          storeGet.addStestData[
+                            currentPage - 1
+                          ].result.toString() ==
+                            storeGet.addStestData[
+                              currentPage - 1
+                            ].userAnswer.toString()
+                        "
+                      ></div>
+                      <div class="bigWrong" v-else></div>
+                    </div>
                   </el-checkbox>
                 </el-checkbox-group>
+              </div>
+              <!-- 正确答案 -->
+              <div
+                class="rightBox"
+                v-if="
+                  storeGetAddTest().addStestData[
+                    currentPage - 1
+                  ].result.toString() !=
+                    storeGetAddTest().addStestData[
+                      currentPage - 1
+                    ].userAnswer.toString() &&
+                  storeGetAddTest().radioAnswer == '1' &&
+                  storeGetAddTest().userAnswerStat == '1'
+                "
+              >
+                <div class="rightBoxL">正确答案:</div>
+                <div class="rightBoxR">
+                  {{
+                    this.storeGet.addStestData[
+                      currentPage - 1
+                    ].result.toString()
+                  }}
+                </div>
               </div>
             </div>
           </div>
@@ -193,12 +260,29 @@
             v-for="(item, index) in this.storeGetAddTest().addStestData"
             :key="item.testId"
           >
-            <div :class="setCircleName(item, index)" @click="circleBtn(index)">
+            <div
+              :class="setCircleName(item, index)"
+              @click="circleBtn(index, item)"
+            >
               {{ index + 1 }}
             </div>
-            <p class="postionConten" v-show="currentPage == index + 1">
-              当前题
-            </p>
+            <p class="postionConten" v-show="currentProblem(index)">当前题</p>
+            <!-- <p class="postionConten" v-show="currentPage == index + 1"> -->
+            <!-- 当前题
+            </p> -->
+            <div
+              v-show="
+                storeGetAddTest().radioAnswer == '1' &&
+                storeGetAddTest().userAnswerStat == '1'
+              "
+            >
+              <div
+                class="right"
+                v-if="item.result.toString() == item.userAnswer.toString()"
+              ></div>
+
+              <div class="wrong" v-else></div>
+            </div>
           </div>
         </div>
         <div
@@ -361,7 +445,7 @@ export default {
       console.log(this.storeGetAddTest().addStestData, "xxx===");
     });
 
-    this.$store.commit("newUserAnswer", { key: this.$route.query.id });
+    // this.$store.commit("newUserAnswer", { key: this.$route.query.id });
     // this.$store.commit("newUserAnswer2", { key: this.$route.query.id });
   },
   mounted() {
@@ -416,6 +500,9 @@ export default {
         this.isButton = false;
         this.lookAnswer = false;
         this.lookErrors = false;
+        this.storeGetAddTest().addStestData.forEach(
+          (item) => (item.userAnswer = "")
+        );
       } else if (
         this.storeGetAddTest().userAnswerStat == "1" &&
         this.storeGetAddTest().radioAnswer == "1"
@@ -425,7 +512,11 @@ export default {
         // this.time = parseInt(this.time) * 60;
         this.lookAnswer = false;
         this.isButton = false;
+        this.pageNextChange("0");
       } else if (this.storeGetAddTest().userAnswerStat == "") {
+        if (this.storeGetAddTest().radioAnswer == "2") {
+          this.lookErrors = false;
+        }
         // this.changeTime1();
         this.changeTime1();
         this.lookAnswer = true;
@@ -457,7 +548,7 @@ export default {
     answerScore() {
       let score = 0;
       const newArr = this.storeGetAddTest().addStestData.filter(
-        (item) => item.result.toString() == item.userAnswer.toString()
+        (item) => item.usercorrect == "0"
       );
       console.log(newArr, "newArr-newArr");
       score = newArr.reduce((prev, cur) => prev + cur.score, 0);
@@ -476,13 +567,58 @@ export default {
         console.log(this.usercorrect, "1-答错");
       }
       console.log(this.userAnswer, "单");
+
       this.$store.commit("userAnswer", {
         key: this.$route.query.id,
         testId: this.storeGet.addStestData[this.currentPage - 1].testId,
         userAnswer: v,
         usercorrect: this.usercorrect,
       });
+      //重复答题不留答题记录
+      // if (this.storeGetAddTest().radioAnswer == "2") {
+      //   this.$store.commit("clearAnswer", {
+      //     key: this.$route.query.id,
+      //     testId: this.storeGet.addStestData[this.currentPage - 1].testId,
+      //     userAnswer: "",
+      //   });
+      // }
     },
+    // 单选选中的项
+    optionIsSelected(v) {
+      const arr1 = this.storeGet.addStestData[
+        this.currentPage - 1
+      ].choice.filter((item) => item.type.toString() == v.toString());
+      return arr1;
+    },
+    //单选正确边框颜色和错误边框颜色
+    colorBorder(ite) {
+      if (
+        this.optionIsSelected(
+          this.storeGet.addStestData[this.currentPage - 1].userAnswer
+        )[0] == ite &&
+        this.storeGetAddTest().userAnswerStat == "1" &&
+        this.storeGetAddTest().radioAnswer == "1"
+      ) {
+        if (
+          this.storeGet.addStestData[this.currentPage - 1].result.toString() ==
+          ite.type.toString()
+        ) {
+          return "isRight";
+        } else {
+          return "isWrong";
+        }
+      }
+    },
+    // 多选选中的项
+    // optionIsSelected2(v) {
+    //   // const arr1 = this.storeGet.addStestData[
+    //   //   this.currentPage - 1
+    //   // ].choice.filter((item) =>  v.includes(item));
+    //   const arr1 = v.filter((item) =>
+    //     this.storeGet.addStestData[this.currentPage - 1].choice.includes(item)
+    //   );
+    //   return arr1;
+    // },
     choiceClick2(v, i) {
       console.log(v, "vv2"); //选中的选项
       console.log(
@@ -502,15 +638,47 @@ export default {
         this.usercorrect = "1"; //答错
         console.log(this.usercorrect, "1-答错");
       }
+
       this.$store.commit("userAnswer", {
         key: this.$route.query.id,
         testId: this.storeGet.addStestData[this.currentPage - 1].testId,
         userAnswer: v,
         usercorrect: this.usercorrect,
       });
+      //重复答题不留答题记录
+      // if (this.storeGetAddTest().radioAnswer == "2") {
+      //   this.$store.commit("clearAnswer", {
+      //     key: this.$route.query.id,
+      //     testId: this.storeGet.addStestData[this.currentPage - 1].testId,
+      //     userAnswer: "",
+      //   });
+      // }
       console.log(this.userAnswer, " this.userAnswer2");
     },
-
+    //多选正确边框颜色和错误边框颜色
+    colorBorder2(ite) {
+      if (
+        this.storeGet.addStestData[this.currentPage - 1].userAnswer.includes(
+          ite.type
+        ) &&
+        this.storeGetAddTest().userAnswerStat == "1" &&
+        this.storeGetAddTest().radioAnswer == "1"
+      ) {
+        if (
+          this.storeGet.addStestData[this.currentPage - 1].result.includes(
+            ite.type
+          ) &&
+          this.storeGet.addStestData[this.currentPage - 1].result.toString() ==
+            this.storeGet.addStestData[
+              this.currentPage - 1
+            ].userAnswer.toString()
+        ) {
+          return "isRight";
+        } else {
+          return "isWrong";
+        }
+      }
+    },
     preChange(currentPage) {
       console.log(currentPage, "page2");
       // if (this.currentPage + 1 == currentPage) {
@@ -561,23 +729,55 @@ export default {
     setCircleName(item, index) {
       // console.log(item, "item,,");
       // console.log(index, "index,,");
-      if (index + 1 == this.currentPage) {
-        // console.log("22");
-
-        return "fourRightCon2";
-      } else {
-        if (item.userAnswer) {
-          // console.log("33");
-          return "fourRightCon3";
+      if (
+        this.storeGetAddTest().userAnswerStat == "1" &&
+        this.storeGetAddTest().radioAnswer == "1"
+      ) {
+        if (index + 1 == this.currentPage) {
+          return "fourRightCon4";
         } else {
-          // console.log("11");
+          return "fourRightCon5";
+        }
+      } else {
+        if (index + 1 == this.currentPage) {
+          // console.log("22");
 
-          return "fourRightCon1";
+          return "fourRightCon2";
+        } else {
+          if (item.userAnswer) {
+            // console.log("33");
+            return "fourRightCon3";
+          } else {
+            // console.log("11");
+
+            return "fourRightCon1";
+          }
         }
       }
     },
-    circleBtn(index) {
+    currentProblem(index) {
+      if (this.currentPage == index + 1) {
+        if (
+          this.storeGetAddTest().userAnswerStat == "1" &&
+          this.storeGetAddTest().radioAnswer == "1"
+        ) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
+    },
+
+    circleBtn(index, item) {
       this.currentPage = index + 1;
+      this.radioData.radio =
+        this.storeGet.addStestData[this.currentPage - 1].userAnswer;
+      this.checkData.check =
+        this.storeGet.addStestData[this.currentPage - 1].userAnswer;
+      console.log(item.result.toString(), "``1");
+      console.log(item.userAnswer.toString(), "`2`");
     },
     againChange() {
       this.currentPage = 1;
@@ -757,20 +957,11 @@ export default {
       let num1 = 0;
       let num2 = 0;
       for (let i = 0; i < this.storeGetAddTest().addStestData.length; i++) {
-        if (
-          this.storeGetAddTest().addStestData[i].result.toString() ==
-          this.storeGetAddTest().addStestData[i].userAnswer.toString()
-        ) {
-          // console.log(this.$route.query.id, "ididid1");
-          num1++;
-
-          // this.storeGetAddTest().addStestData[i].usercorrect = "0";
-          // this.$store.commit("result1", {
-          //   usercorrect: "0", //正确为0
-          //   key: this.$route.query.id,
-          // });
-        } else {
+        //答错
+        if (this.storeGetAddTest().addStestData[i].usercorrect == "1") {
           num2++;
+        } else {
+          num1++;
         }
         console.log(num1, "num1");
         this.$store.commit("result2", {
@@ -794,10 +985,22 @@ export default {
         answerScore: this.answerScore(),
         key: this.$route.query.id,
       });
+      //重复答题不留答题记录
+      // if (this.storeGetAddTest().radioAnswer == "2") {
+      //   this.radioData.radio = "";
+      //   this.checkData.check = [];
+      //   this.$store.commit("clearAnswer", {
+      //     key: this.$route.query.id,
+      //     testId: this.storeGet.addStestData[this.currentPage - 1].testId,
+      //     userAnswer: "",
+      //   });
+      // }
+
       localStorage.setItem(
         "totalData2",
         JSON.stringify(this.$store.state.trainingActivity)
       );
+
       // this.storeGetAddTest.addStestData.forEach((item) => {
       //   if (item.result.toString() == item.userAnswer.toString()) {
       //     item.rightNum += 1;
@@ -965,7 +1168,7 @@ export default {
 
           .radioCon {
             ::v-deep .radioGroup {
-              border: 1px solid red;
+              // border: 1px solid red;
               display: flex;
               flex-direction: column;
 
@@ -1012,13 +1215,34 @@ export default {
                     white-space: normal;
                     border-left: 1px solid rgba(0, 0, 0, 0.15);
                   }
+                  .bigRight {
+                    width: 32px;
+                    height: 32px;
+                    background: url("../assets/对号.png") no-repeat center;
+                    position: absolute;
+                    top: -12px;
+                    right: -12px;
+                  }
+                  .bigWrong {
+                    width: 32px;
+                    height: 32px;
+                    background: url("../assets/叉号.png") no-repeat center;
+                    position: absolute;
+                    top: -12px;
+                    right: -12px;
+                  }
                 }
               }
 
               .is-checked {
                 border: 1px solid #317cfb;
               }
-
+              .isRight {
+                border: 1px solid #25cd9f;
+              }
+              .isWrong {
+                border: 1px solid #ff5248;
+              }
               .is-bordered {
                 margin-left: 0;
                 height: auto;
@@ -1028,7 +1252,7 @@ export default {
 
           .checkedCon {
             ::v-deep .checkGroup {
-              border: 1px solid red;
+              // border: 1px solid red;
               display: flex;
               flex-direction: column;
 
@@ -1041,6 +1265,7 @@ export default {
                 margin-bottom: 12px;
                 padding-top: 0;
                 display: flex;
+                position: relative;
 
                 // align-items: center;
                 .el-checkbox__input {
@@ -1056,7 +1281,6 @@ export default {
                   padding: 14px 0 18px 16px;
                   display: flex;
                   align-items: center;
-
                   .p1 {
                     height: 26px;
                     margin: 0;
@@ -1075,20 +1299,65 @@ export default {
                     white-space: normal;
                     border-left: 1px solid rgba(0, 0, 0, 0.15);
                   }
+                  .bigRight {
+                    width: 32px;
+                    height: 32px;
+                    background: url("../assets/对号.png") no-repeat center;
+                    position: absolute;
+                    top: -12px;
+                    right: -12px;
+                  }
+                  .bigWrong {
+                    width: 32px;
+                    height: 32px;
+                    background: url("../assets/叉号.png") no-repeat center;
+                    position: absolute;
+                    top: -12px;
+                    right: -12px;
+                  }
                 }
               }
 
               .is-checked {
                 border: 1px solid #317cfb;
               }
-
+              .isRight {
+                border: 1px solid #25cd9f;
+              }
+              .isWrong {
+                border: 1px solid #ff5248;
+              }
               .is-bordered {
                 margin-left: 0;
                 height: auto;
               }
             }
           }
-
+          .rightBox {
+            width: 841px;
+            height: 46px;
+            background: #f5f7fa;
+            border-radius: 4px 4px 4px 4px;
+            margin-top: 30px;
+            padding-left: 16px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            .rightBoxL {
+              width: 103px;
+              font-size: 20px;
+              font-family: PingFang SC-Medium, PingFang SC;
+              font-weight: 500;
+              color: #595959;
+              margin-right: 12px;
+            }
+            .rightBoxR {
+              font-size: 25px;
+              font-family: PingFang SC-Semibold, PingFang SC;
+              font-weight: 600;
+              color: rgba(0, 0, 0, 0.65);
+            }
+          }
           //边框颜色改变
           .optionsItemBord {
             border: 1px solid #317cfb;
@@ -1407,7 +1676,29 @@ export default {
           text-align: center;
           line-height: 44px;
         }
+        .fourRightCon4 {
+          box-sizing: border-box;
+          border: 1px solid #317cfb;
+          border-radius: 50%;
+          width: 100%;
+          height: 100%;
 
+          background: #eaf2ff;
+          // border: 0px solid #317cfb;
+          color: #1c1f21;
+          text-align: center;
+          line-height: 44px;
+        }
+        .fourRightCon5 {
+          box-sizing: border-box;
+          border-radius: 50%;
+          width: 100%;
+          height: 100%;
+          color: #1c1f21;
+          background: rgba(0, 0, 0, 0.04);
+          text-align: center;
+          line-height: 44px;
+        }
         .postionConten {
           position: absolute;
           top: 22px;
@@ -1420,6 +1711,26 @@ export default {
           font-weight: 400;
           color: #000000;
           line-height: 17px;
+        }
+        .wrong {
+          width: 17px;
+          height: 17px;
+          border-radius: 50%;
+          background: url("../assets/1.通用／2.Icon图标／Fill／Check-Circle-Fill绿\ \(1\).png")
+            no-repeat center;
+          position: absolute;
+          right: 0;
+          bottom: 0px;
+        }
+        .right {
+          width: 17px;
+          height: 17px;
+          border-radius: 50%;
+          background: url("../assets/1.通用／2.Icon图标／Fill／Check-Circle-Fill绿.png")
+            no-repeat center;
+          position: absolute;
+          right: 0;
+          bottom: 0px;
         }
       }
     }
