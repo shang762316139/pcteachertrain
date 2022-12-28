@@ -36,8 +36,8 @@
           line-width="51px"
           title-active-color="#317cfb"
           title-inactive-color="#595959"
-          @rendered="navHandle"
-          @change="navHandle"
+          @rendered="navHandle2"
+          @change="navHandle2"
         >
           <van-tab
             :title="item.title"
@@ -50,6 +50,7 @@
         <keep-alive>
           <component v-bind:is="view"></component>
         </keep-alive>
+        <!-- <router-view></router-view> -->
       </div>
     </div>
   </div>
@@ -93,9 +94,16 @@ export default {
   //mounted: {},
 
   methods: {
-    navHandle(key, v) {
-      console.log(key, v, "key--v");
+    navHandle2(key, v) {
       this.view = this.navContent[key].componentId;
+      // if (key == 0) {
+      //   this.$router.push({ name: "briefIntroduction" });
+      console.log(key, v, "key--v");
+      // } else if (key == 1) {
+      //   this.$router.push({ name: "courseLearning" });
+      // } else {
+      //   this.$router.push({ name: "testActivity" });
+      // }
 
       // this.navContent[key].navChildren;
     },

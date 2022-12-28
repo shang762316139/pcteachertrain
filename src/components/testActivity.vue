@@ -431,6 +431,10 @@ export default {
       lookAnswer: true,
       //查看错题
       lookErrors: true,
+      //点击查看错题
+      lookErrors2: false,
+      //错题集
+      errorArr: [],
     };
   },
 
@@ -1047,6 +1051,35 @@ export default {
     },
     lookHandle() {
       this.sureVisible = false;
+      this.lookErrors2 = true;
+      // console.log(this.$route.query.id, "id");
+
+      // this.error();
+      // const errorArr = this.storeGetAddTest().addStestData.filter(
+      //   (item) => item.usercorrect == "1"
+      // );
+      this.$store.commit("errorArr", {
+        errorArr: this.error(),
+        key: this.$route.query.id,
+      });
+      // this.storeGetAddTest().addStestData = errorArr;
+      // this.storeGet.addStestData = errorArr;
+
+      this.$router.push({
+        name: "activityItem",
+        query: { id: this.$route.query.id },
+      });
+      // this.storeGet.addStestData = this.lookErrors2
+      //   ? this.error()
+      //   : this.storeGetAddTest().addStestData;
+    },
+    //错题集
+    error() {
+      const errorArr = this.storeGetAddTest().addStestData.filter(
+        (item) => item.usercorrect == "1"
+      );
+      // console.log(errorArr, "errorArr");
+      return errorArr;
     },
   },
 };

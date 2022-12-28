@@ -94,6 +94,12 @@ const mutations = {
     activity[0].getAddTest.situation.push(payloade);
     console.log(activity[0].getAddTest.situation, "result3");
   },
+  errorArr({ trainingActivity }, payloade) {
+    const activity = trainingActivity.filter(
+      (item) => item.key == payloade.key
+    );
+    activity[0].getAddTest.addStestData = payloade.errorArr;
+  },
 };
 //actions:同mutations类似，可以书写自己的业务逻辑，也可以处理异步，不直接更变数据状态，而是提交到mutations，由mutations进行变更
 const actions = {

@@ -28,6 +28,23 @@ const routes = [
         path: "/activityItem",
         name: "activityItem",
         component: () => import("../views/activityItem.vue"),
+        children: [
+          {
+            path: "/courseLearning",
+            name: "courseLearning",
+            component: () => import("../components/courseLearning.vue"),
+          },
+          {
+            path: "/briefIntroduction",
+            name: "briefIntroduction",
+            component: () => import("../components/briefIntroduction.vue"),
+          },
+          {
+            path: "/testActivity",
+            name: "testActivity",
+            component: () => import("../components/testActivity.vue"),
+          },
+        ],
       },
       // {
       //   path: "/testActivity",
